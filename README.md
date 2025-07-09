@@ -12,6 +12,7 @@ A modern, user-friendly Arduino Nano based MIDI controller that converts button 
 - 📝 **Script Management**: Built-in script editor with validation
 - 🔄 **Import/Export**: Backup and share configurations easily
 - 🌐 **Remote Repository**: Download scripts from online repositories
+- 🔧 **Arduino Flasher**: Built-in Arduino sketch flashing tool
 - 🔌 **Plug & Play**: Simple USB connection, no additional hardware required
 
 ## 🚀 Quick Start
@@ -25,13 +26,22 @@ A modern, user-friendly Arduino Nano based MIDI controller that converts button 
 - LEDs (optional, for feedback)
 - Resistors (10kΩ pull-up, 220Ω for LEDs)
 
-**Basic Wiring:**
+**Basic Wiring (1 Button):**
 ```
 Arduino Pin 2  ← Button 1 → GND
 Arduino Pin 10 ← LED 1 (with 220Ω resistor) → GND
 ```
 
-See `wiring_diagram.txt` for detailed wiring instructions.
+**Multi-Button Wiring (up to 5 buttons):**
+```
+Button 1: Pin 2 → Button → GND (LED on Pin 10)
+Button 2: Pin 3 → Button → GND (LED on Pin 11)
+Button 3: Pin 4 → Button → GND (LED on Pin 12)
+Button 4: Pin 5 → Button → GND (LED on Pin 13)
+Button 5: Pin 6 → Button → GND (LED on Pin A0)
+```
+
+See `multi_button_wiring.txt` for detailed wiring instructions.
 
 ### 2. Software Installation
 
@@ -40,21 +50,19 @@ See `wiring_diagram.txt` for detailed wiring instructions.
 pip install -r requirements.txt
 ```
 
-**Install Arduino IDE:**
-```bash
-# macOS
-brew install --cask arduino-ide
-
-# Or download from https://www.arduino.cc/en/software
-```
-
 ### 3. Arduino Programming
 
-1. Open `midi_controller/midi_controller.ino` in Arduino IDE
-2. Install MIDI Library: Tools → Manage Libraries → Search "MIDI Library"
-3. Select Board: Arduino Nano
-4. Select Processor: ATmega328P (Old Bootloader)
-5. Upload the code
+**Easy Way (Automatic):**
+```bash
+python3 flash_arduino.py
+```
+
+**Manual Way:**
+1. Install Arduino CLI: `brew install arduino-cli`
+2. Choose your sketch:
+   - `midi_controller.ino` - Single button (Pin 2)
+   - `midi_controller_multi.ino` - Multi button (Pins 2-6)
+3. Flash using Arduino IDE or CLI
 
 ### 4. Configuration
 
@@ -63,12 +71,9 @@ brew install --cask arduino-ide
 python3 setup.py
 ```
 
-**Manual Configuration:**
+**Run the Controller:**
 ```bash
-# Test connection
 python3 bridge.py
-
-# If no config exists, create one first with setup.py
 ```
 
 ## 📋 Available Scripts
@@ -84,25 +89,50 @@ python3 bridge.py
 - `open_vscode` - Launches Visual Studio Code
 - `volume_control` - Controls system volume (mute/up/down)
 
+### Media Scripts
+- `music_control` - Controls music playback (play/pause/next/previous)
+
+### Fun Scripts
+- `rickroll` - Opens Rick Roll video (prank script)
+- `random_joke` - Displays random programming jokes
+- `weather` - Shows current weather information
+
 ### Templates
 - System: shutdown, restart
-- Applications: calculator, text editor
+- Applications: calculator, text editor, notepad
 - Development: git status, npm commands
-- Fun: random jokes, quotes
+- Fun: random jokes, weather
 
 ## 🔧 Configuration
+
+### Arduino Flasher Tool
+
+The built-in flasher automatically handles:
+- Arduino CLI installation (via Homebrew)
+- Library installation (MIDI Library)
+- Sketch compilation and upload
+- Port detection and selection
+
+```bash
+python3 flash_arduino.py
+```
 
 ### Interactive Setup Tool
 
 The modern setup tool provides:
-
 - **Button Configuration**: Auto-detect Arduino ports and configure buttons
 - **Script Management**: View, edit, and manage available scripts
 - **System Settings**: Configure serial communication and platform detection
 - **Test Configuration**: Validate setup before use
 - **Import/Export**: Backup and restore configurations
 
-### Manual Configuration
+### Button Configuration
+
+Each button can be configured with:
+- **Port**: Arduino serial port
+- **Control Number**: MIDI control change number (1-5)
+- **Script**: Associated macro script
+- **Status**: Enabled/disabled
 
 Configuration is stored in `config.json`:
 
@@ -116,6 +146,13 @@ Configuration is stored in `config.json`:
       "script": "open_terminal",
       "enabled": true,
       "description": "Open Terminal with hello world"
+    },
+    "2": {
+      "port": "/dev/cu.usbserial-10", 
+      "control_number": 2,
+      "script": "screenshot",
+      "enabled": true,
+      "description": "Take screenshot"
     }
   },
   "settings": {
@@ -176,6 +213,18 @@ def is_supported():
     return platform.system() in get_metadata()["supported_os"]
 ```
 
+## 🔧 Arduino Sketches
+
+### Single Button Controller (`midi_controller.ino`)
+- **Buttons**: 1 button on Pin 2
+- **LEDs**: 1 LED on Pin 10
+- **MIDI**: Control Change 1
+
+### Multi Button Controller (`midi_controller_multi.ino`)
+- **Buttons**: Up to 5 buttons on Pins 2-6
+- **LEDs**: Up to 5 LEDs on Pins 10-13, A0
+- **MIDI**: Control Changes 1-5
+
 ## 🌐 Remote Repository
 
 Download scripts from online repositories:
@@ -184,12 +233,6 @@ Download scripts from online repositories:
 python3 setup.py
 # Select "Manage Scripts" → "Remote Repository"
 ```
-
-Features:
-- Search across multiple repositories
-- Download progress tracking
-- Automatic updates
-- Repository statistics
 
 ## 🔄 Import/Export
 
@@ -205,36 +248,20 @@ python3 setup.py
 # Select "System Settings" → "Import Configuration"
 ```
 
-Export files include:
-- Complete configuration
-- All custom scripts
-- System metadata
-- Platform information
-
 ## 🛠️ Advanced Usage
 
-### Multiple Arduino Devices
-
-Configure multiple Arduino Nanos on different ports:
+### Multiple Button Example
 
 ```json
 {
   "buttons": {
-    "1": {"port": "/dev/cu.usbserial-10", "script": "open_terminal"},
-    "2": {"port": "/dev/cu.usbserial-20", "script": "screenshot"}
+    "1": {"port": "/dev/cu.usbserial-10", "script": "open_terminal", "control_number": 1},
+    "2": {"port": "/dev/cu.usbserial-10", "script": "screenshot", "control_number": 2},
+    "3": {"port": "/dev/cu.usbserial-10", "script": "volume_control", "control_number": 3},
+    "4": {"port": "/dev/cu.usbserial-10", "script": "music_control", "control_number": 4},
+    "5": {"port": "/dev/cu.usbserial-10", "script": "weather", "control_number": 5}
   }
 }
-```
-
-### Script Parameters
-
-Pass parameters to scripts:
-
-```python
-def execute(volume_level=50):
-    """Script with parameters"""
-    # Use volume_level parameter
-    pass
 ```
 
 ### Debug Mode
@@ -255,6 +282,7 @@ python3 setup.py
 | Arduino not detected | Check drivers, try different USB port |
 | Button not responding | Verify wiring, check pull-up resistors |
 | Script fails to execute | Check script syntax, verify OS compatibility |
+| Multiple buttons not working | Flash multi-button sketch (`midi_controller_multi.ino`) |
 | Permission denied | Run with appropriate permissions |
 
 ### Debug Commands
@@ -263,18 +291,15 @@ python3 setup.py
 # Test serial connection
 python3 -c "from utils.serial_manager import SerialManager; sm = SerialManager(); print(sm.discover_ports())"
 
+# Flash Arduino automatically
+python3 flash_arduino.py
+
 # Validate script
 python3 -c "from utils.script_loader import ScriptLoader; sl = ScriptLoader(); print(sl.validate_script_file('scripts/my_script.py'))"
 
 # Check configuration
 python3 -c "from utils.config_manager import ConfigManager; cm = ConfigManager(); print(cm.load_config())"
 ```
-
-### Log Files
-
-- Configuration: `config.json`
-- Exports: `exports/` directory
-- Cache: `.cache/` directory
 
 ## 🤝 Contributing
 
@@ -301,6 +326,7 @@ Open Source - Free for personal and commercial use.
 - Built with [Rich](https://rich.readthedocs.io/) for beautiful console output
 - [Inquirer](https://python-inquirer.readthedocs.io/) for interactive prompts
 - [PySerial](https://pyserial.readthedocs.io/) for Arduino communication
+- [Arduino CLI](https://arduino.github.io/arduino-cli/) for automated flashing
 - MIDI Library by FortySevenEffects for Arduino
 
 ## 📞 Support
