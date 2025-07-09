@@ -27,17 +27,17 @@ class ArduinoFlasher:
         """Initialize the Arduino flasher."""
         self.console = Console()
         self.serial_manager = SerialManager()
-        self.sketches_dir = Path("midi_controller")
-        
         # Available sketches
         self.sketches = {
             "single": {
+                "dir": "midi_controller_single",
                 "file": "midi_controller.ino",
                 "name": "Single Button Controller",
                 "description": "Supports 1 button on Pin 2 with LED on Pin 10",
                 "buttons": 1
             },
             "multi": {
+                "dir": "midi_controller_multi",
                 "file": "midi_controller_multi.ino", 
                 "name": "Multi Button Controller",
                 "description": "Supports up to 5 buttons on Pins 2-6 with LEDs on Pins 10-13,A0",
@@ -201,7 +201,7 @@ class ArduinoFlasher:
             True if flashing succeeded, False otherwise
         """
         sketch = self.sketches[sketch_key]
-        sketch_path = self.sketches_dir / sketch["file"]
+        sketch_path = Path(sketch["dir"]) / sketch["file"]
         
         if not sketch_path.exists():
             self.console.print(f"❌ Sketch file not found: {sketch_path}", style="red")
@@ -219,7 +219,7 @@ class ArduinoFlasher:
                 compile_result = subprocess.run([
                     "arduino-cli", "compile",
                     "--fqbn", "arduino:avr:nano:cpu=atmega328old",
-                    str(sketch_path)
+                    str(sketch_path.parent)
                 ], capture_output=True, text=True, check=True)
                 
                 progress.update(task1, completed=True)
@@ -231,7 +231,7 @@ class ArduinoFlasher:
                     "arduino-cli", "upload",
                     "--fqbn", "arduino:avr:nano:cpu=atmega328old",
                     "--port", port,
-                    str(sketch_path)
+                    str(sketch_path.parent)
                 ], capture_output=True, text=True, check=True)
                 
                 progress.update(task2, completed=True)
