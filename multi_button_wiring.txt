@@ -1,0 +1,73 @@
+Arduino Nano Multi-Button MIDI Controller - Verkabelung
+=====================================================
+
+Für bis zu 5 Buttons mit LEDs:
+
+Button-Verkabelung:
+------------------
+Button 1: Pin 2 → Button → GND
+Button 2: Pin 3 → Button → GND  
+Button 3: Pin 4 → Button → GND
+Button 4: Pin 5 → Button → GND
+Button 5: Pin 6 → Button → GND
+
+LED-Verkabelung:
+---------------
+LED 1: Pin 10 → 220Ω Widerstand → LED (lange Seite) → GND
+LED 2: Pin 11 → 220Ω Widerstand → LED (lange Seite) → GND
+LED 3: Pin 12 → 220Ω Widerstand → LED (lange Seite) → GND
+LED 4: Pin 13 → 220Ω Widerstand → LED (lange Seite) → GND
+LED 5: Pin A0 → 220Ω Widerstand → LED (lange Seite) → GND
+
+MIDI Control Change Nummern:
+---------------------------
+Button 1 → Control Change 1
+Button 2 → Control Change 2
+Button 3 → Control Change 3
+Button 4 → Control Change 4
+Button 5 → Control Change 5
+
+Steckboard Layout:
+-----------------
+  Arduino Nano
+  +-------+
+  |  USB  |
+  +-------+
+  |  D13  |--- LED 4 (mit 220Ω) --- GND
+  |  D12  |--- LED 3 (mit 220Ω) --- GND
+  |  D11  |--- LED 2 (mit 220Ω) --- GND
+  |  D10  |--- LED 1 (mit 220Ω) --- GND
+  |  D9   |
+  |  D8   |
+  |  D7   |
+  |  D6   |--- Button 5 --- GND
+  |  D5   |--- Button 4 --- GND
+  |  D4   |--- Button 3 --- GND
+  |  D3   |--- Button 2 --- GND
+  |  D2   |--- Button 1 --- GND
+  |  GND  |--- Gemeinsamer GND für alle Buttons und LEDs
+  |  RST  |
+  |  RX0  |
+  |  TX1  |
+  |  A0   |--- LED 5 (mit 220Ω) --- GND
+  |  A1   |
+  |  A2   |
+  |  A3   |
+  |  A4   |
+  |  A5   |
+  |  A6   |
+  |  A7   |
+  |  5V   |
+  |  RST  |
+  |  GND  |--- Gemeinsamer GND
+  |  VIN  |
+  +-------+
+
+Hinweise:
+--------
+- Alle Buttons verwenden die internen Pull-up Widerstände
+- Jeder Button hat eine eigene LED als Feedback
+- Buttons werden als LOW erkannt (gedrückt)
+- Jeder Button sendet eine andere MIDI Control Change Nummer
+- Du kannst weniger Buttons verwenden (z.B. nur 1-3)
+- Einfach nicht verwendete Pins nicht anschließen
