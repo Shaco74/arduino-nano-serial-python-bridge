@@ -63,8 +63,9 @@ class SerialManager:
         filtered = []
         
         for port in ports:
-            description = port['description'].lower()
-            manufacturer = port.get('manufacturer', '').lower()
+            description = port['description'].lower() if port['description'] else ''
+            manufacturer = port.get('manufacturer', '') or ''
+            manufacturer = manufacturer.lower()
             
             if any(keyword in description or keyword in manufacturer 
                    for keyword in arduino_keywords):
