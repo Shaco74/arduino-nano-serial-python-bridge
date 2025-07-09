@@ -1,0 +1,73 @@
+Arduino Nano MIDI Controller - Verkabelung
+==========================================
+
+Komponenten:
+- Arduino Nano (ATmega328P)
+- Steckboard (Breadboard)
+- Taster (Push Button)
+- LED (optional, für visuelles Feedback)
+- 10kΩ Widerstand (Pull-up für Button)
+- 220Ω Widerstand (für LED)
+- Verbindungskabel
+
+Verkabelung:
+-----------
+
+Button:
+- Pin 1 des Tasters → Arduino Pin 2
+- Pin 2 des Tasters → GND
+- 10kΩ Widerstand zwischen Arduino Pin 2 und 5V (Pull-up)
+
+LED (optional):
+- Längerer Pin (Anode) → 220Ω Widerstand → Arduino Pin 10
+- Kürzerer Pin (Kathode) → GND
+
+Steckboard Layout:
+-----------------
+  Arduino Nano
+  +-------+
+  |  USB  |
+  +-------+
+  |  D13  |
+  |  D12  |
+  |  D11  |
+  |  D10  |--- LED (mit 220Ω Widerstand) --- GND
+  |  D9   |
+  |  D8   |
+  |  D7   |
+  |  D6   |
+  |  D5   |
+  |  D4   |
+  |  D3   |
+  |  D2   |--- Button --- GND
+  |  GND  |--- gemeinsamer GND
+  |  RST  |
+  |  RX0  |
+  |  TX1  |
+  |  D4   |
+  |  D5   |
+  |  D6   |
+  |  D7   |
+  |  D8   |
+  |  D9   |
+  |  3V3  |
+  |  REF  |
+  |  A0   |
+  |  A1   |
+  |  A2   |
+  |  A3   |
+  |  A4   |
+  |  A5   |
+  |  A6   |
+  |  A7   |
+  |  5V   |--- 10kΩ Pull-up Widerstand --- Button
+  |  RST  |
+  |  GND  |
+  |  VIN  |
+  +-------+
+
+Hinweise:
+- Der interne Pull-up wird im Code aktiviert (INPUT_PULLUP)
+- Externer Pull-up Widerstand ist optional aber empfohlen
+- LED ist optional, zeigt Button-Status an
+- USB-Verbindung zum PC für MIDI-Kommunikation
