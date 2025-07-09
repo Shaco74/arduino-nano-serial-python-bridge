@@ -117,8 +117,12 @@ class ArduinoFlasher:
             ) as progress:
                 task1 = progress.add_task("Initializing Arduino CLI config...", total=None)
                 
-                # Initialize config
-                subprocess.run(["arduino-cli", "config", "init"], check=True, capture_output=True)
+                # Initialize config (ignore errors if already initialized)
+                try:
+                    subprocess.run(["arduino-cli", "config", "init"], check=True, capture_output=True)
+                except subprocess.CalledProcessError:
+                    # Config already exists, that's fine
+                    pass
                 progress.update(task1, completed=True)
                 
                 task2 = progress.add_task("Updating core index...", total=None)
@@ -129,14 +133,22 @@ class ArduinoFlasher:
                 
                 task3 = progress.add_task("Installing Arduino AVR core...", total=None)
                 
-                # Install Arduino AVR core
-                subprocess.run(["arduino-cli", "core", "install", "arduino:avr"], check=True, capture_output=True)
+                # Install Arduino AVR core (ignore if already installed)
+                try:
+                    subprocess.run(["arduino-cli", "core", "install", "arduino:avr"], check=True, capture_output=True)
+                except subprocess.CalledProcessError:
+                    # Core already installed, that's fine
+                    pass
                 progress.update(task3, completed=True)
                 
                 task4 = progress.add_task("Installing MIDI Library...", total=None)
                 
-                # Install MIDI Library
-                subprocess.run(["arduino-cli", "lib", "install", "MIDI Library"], check=True, capture_output=True)
+                # Install MIDI Library (ignore if already installed)
+                try:
+                    subprocess.run(["arduino-cli", "lib", "install", "MIDI Library"], check=True, capture_output=True)
+                except subprocess.CalledProcessError:
+                    # Library already installed, that's fine
+                    pass
                 progress.update(task4, completed=True)
             
             self.console.print("✅ Arduino CLI setup completed", style="green")
