@@ -4,91 +4,230 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an Arduino Nano MIDI Controller project that converts button presses into PC macros. The system consists of:
+This is a modern, user-friendly Arduino Nano MIDI Controller system that converts button presses into customizable PC macros. The system has evolved from a basic serial communication setup to a comprehensive automation platform.
 
-1. **Arduino Code** (`midi_controller/midi_controller.ino`) - Sends MIDI Control Change messages over serial
-2. **Python Bridge Scripts** - Convert MIDI messages to system macros
-   - `serial_macro_bridge.py` - Direct serial communication (recommended)
-   - `midi_macro_bridge.py` - MIDI port communication (optional)
+### Architecture Components
+
+1. **Arduino Code** (`midi_controller/midi_controller.ino`) - MIDI Control Change messages over USB serial
+2. **Core Infrastructure** (`utils/`) - Configuration, serial communication, and script management
+3. **Main Applications** - Interactive setup tool and runtime bridge
+4. **Script System** - Plugin-based macro execution with templates and remote repository support
+5. **Advanced Features** - Script editor, import/export, and repository management
 
 ## Development Commands
+
+### Setup and Installation
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Interactive setup (modern UI)
+python3 setup.py
+
+# Run main application
+python3 bridge.py
+```
 
 ### Arduino Development
 ```bash
 # Install Arduino IDE
 brew install --cask arduino-ide
 
-# Flash Arduino code
-# 1. Open midi_controller/midi_controller.ino in Arduino IDE
-# 2. Install MIDI Library (Tools → Manage Libraries → "MIDI Library" by FortySevenEffects)
-# 3. Set Board: Arduino Nano, Processor: ATmega328P (Old Bootloader)
+# Upload process:
+# 1. Open midi_controller/midi_controller.ino
+# 2. Install MIDI Library (Tools → Manage Libraries → "MIDI Library")
+# 3. Board: Arduino Nano, Processor: ATmega328P (Old Bootloader)
 # 4. Upload to device
 ```
 
-### Python Development
+### Development and Testing
 ```bash
-# Install dependencies
-pip install pyserial
+# Test serial connection
+python3 -c "from utils.serial_manager import SerialManager; sm = SerialManager(); print(sm.discover_ports())"
 
-# List available serial ports
-python3 serial_macro_bridge.py
+# Validate script
+python3 -c "from utils.script_loader import ScriptLoader; sl = ScriptLoader(); print(sl.validate_script_file('scripts/my_script.py'))"
 
-# Connect to Arduino (replace with actual port)
-python3 serial_macro_bridge.py "/dev/cu.usbserial-10"
+# Check configuration
+python3 -c "from utils.config_manager import ConfigManager; cm = ConfigManager(); print(cm.load_config())"
 
-# Optional MIDI dependencies
-pip install mido python-rtmidi
+# Run specific script
+python3 -c "from utils.script_loader import ScriptLoader; sl = ScriptLoader(); sl.load_script('script_name'); sl.execute_script('script_name')"
 ```
 
-### Testing
-```bash
-# Test hardware connection
-python3 serial_macro_bridge.py "/dev/cu.usbserial-10"
-# Press button → should execute macro_1 function
+## System Architecture
 
-# Debug serial communication
-# Check Arduino IDE Serial Monitor at 31250 baud
-```
+### Core Infrastructure (Phase 1)
+- **ConfigManager** (`utils/config_manager.py`) - JSON-based configuration with validation
+- **SerialManager** (`utils/serial_manager.py`) - Thread-safe Arduino communication with MIDI parsing
+- **ScriptLoader** (`utils/script_loader.py`) - Dynamic script loading with interface validation
+- **Main Bridge** (`bridge.py`) - Runtime application with Rich UI and live monitoring
 
-## Architecture
+### Script System (Phase 2)
+- **Standard Interface** - All scripts implement `execute()`, `get_metadata()`, `is_supported()`
+- **Cross-Platform Support** - macOS, Linux, Windows implementations
+- **Categories** - System, Application, Development, Fun, Custom
+- **Templates** - Pre-built examples in `templates/` directory
+- **Core Scripts** - Essential automation in `scripts/` directory
+
+### User Experience (Phase 3)
+- **Interactive Setup** (`setup.py`) - Modern console UI with Rich and Inquirer
+- **Live Monitoring** - Real-time status display with connection and button states
+- **Error Handling** - Comprehensive validation and user feedback
+- **Multi-Platform** - Auto-detection and platform-specific optimizations
+
+### Advanced Features (Phase 4)
+- **Script Editor** (`utils/script_editor.py`) - Create, edit, validate custom scripts
+- **Config Export** (`utils/config_export.py`) - Backup and sharing with ZIP format
+- **Remote Repository** (`utils/remote_repository.py`) - Download scripts from online repos
+- **Extensibility** - Plugin architecture for future enhancements
+
+## Key Configuration
 
 ### Hardware Interface
-- **Button Input**: Pin 2 (INPUT_PULLUP, debounced)
-- **LED Output**: Pin 10 (visual feedback)
-- **Communication**: USB Serial at 31250 baud (MIDI standard)
+- **Button Pins**: 2, 3, 4, 5, 6 (configurable, with INPUT_PULLUP)
+- **LED Pins**: 10, 11, 12, 13, A0 (configurable outputs)
+- **Serial Communication**: 31250 baud (MIDI standard)
+- **MIDI Channel**: 1 (configurable)
 
-### Software Flow
-1. Arduino detects button press → sends MIDI Control Change (0xB0, control=1, value=127/0)
-2. Python bridge receives serial data → parses MIDI messages
-3. Bridge executes corresponding macro function based on control number
+### Software Configuration
+```json
+{
+  "os": "Darwin",
+  "buttons": {
+    "1": {
+      "port": "/dev/cu.usbserial-10",
+      "control_number": 1,
+      "script": "open_terminal",
+      "enabled": true,
+      "description": "Open Terminal with hello world"
+    }
+  },
+  "settings": {
+    "serial_timeout": 1,
+    "baud_rate": 31250,
+    "debug_mode": false
+  }
+}
+```
 
-### Macro System
-- Macros are defined in `SerialMacroBridge.macros` dictionary
-- Control Change number maps to macro function
-- Platform-specific implementations (Darwin/Linux/Windows)
-- Current macro_1: Opens Terminal with "echo hello world"
+### Script Interface Standard
+```python
+def execute(**kwargs):
+    """Main execution function - called on button press"""
+    pass
 
-### Key Configuration
-- **Serial Baud Rate**: 31250 (MIDI standard)
-- **Button Pin**: 2 (with internal pullup)
-- **LED Pin**: 10
-- **MIDI Channel**: 1
-- **Control Change Number**: 1
+def get_metadata():
+    """Returns script metadata dictionary"""
+    return {
+        "name": "Script Name",
+        "description": "What the script does",
+        "supported_os": ["Darwin", "Linux", "Windows"],
+        "category": "system|application|development|fun|custom",
+        "version": "1.0",
+        "author": "Author Name"
+    }
+
+def is_supported():
+    """Check if script is supported on current OS"""
+    return platform.system() in get_metadata()["supported_os"]
+```
 
 ## Extending the System
 
-### Adding New Buttons
-1. Define new pin constants in Arduino code
-2. Add button reading logic in loop()
-3. Send different Control Change numbers
-4. Add corresponding macro functions in Python
+### Adding New Scripts
+1. Create `.py` file in `scripts/` directory
+2. Implement standard interface (execute, get_metadata, is_supported)
+3. Add cross-platform implementations
+4. Test with `setup.py` → "Test Configuration"
 
-### Adding New Macros
-1. Define new macro function in SerialMacroBridge class
-2. Add entry to self.macros dictionary
-3. Use platform.system() for cross-platform compatibility
+### Adding New Hardware
+1. Update Arduino code with new pin definitions
+2. Send different MIDI Control Change numbers
+3. Add button configuration in `setup.py`
+4. Test serial communication
 
-### Platform Support
-- **macOS**: Uses `osascript` for AppleScript automation
-- **Linux**: Uses `xdotool` for keyboard/mouse simulation  
-- **Windows**: Uses PowerShell SendKeys for automation
+### Adding New Features
+1. Create utility module in `utils/`
+2. Add to main applications (`setup.py`, `bridge.py`)
+3. Update configuration schema if needed
+4. Add tests and documentation
+
+## File Structure
+```
+arduino-nano-macro-controller/
+├── setup.py                    # Interactive setup tool
+├── bridge.py                   # Main runtime application
+├── config.json                 # Configuration (generated)
+├── requirements.txt            # Python dependencies
+├── utils/                      # Core infrastructure
+│   ├── config_manager.py       # Configuration management
+│   ├── serial_manager.py       # Arduino communication
+│   ├── script_loader.py        # Script loading and execution
+│   ├── script_editor.py        # Script creation and editing
+│   ├── config_export.py        # Import/export functionality
+│   └── remote_repository.py    # Remote script downloads
+├── scripts/                    # User scripts
+│   ├── open_terminal.py        # Terminal launcher
+│   ├── screenshot.py           # Screen capture
+│   ├── volume_control.py       # System volume
+│   └── ...                     # Additional scripts
+├── templates/                  # Script templates
+│   ├── system/                 # System automation
+│   ├── applications/           # App launchers
+│   ├── development/            # Dev tools
+│   └── fun/                    # Entertainment
+├── midi_controller/            # Arduino code
+│   └── midi_controller.ino     # Main sketch
+├── exports/                    # Configuration exports
+├── .cache/                     # Repository cache
+└── docs/                       # Documentation
+```
+
+## Development Guidelines
+
+### Code Style
+- Follow PEP 8 for Python code
+- Use type hints for function parameters and returns
+- Include comprehensive docstrings
+- Handle exceptions gracefully with user-friendly messages
+
+### Error Handling
+- Use Rich console for consistent error display
+- Provide actionable error messages
+- Include debug information when debug_mode is enabled
+- Graceful degradation when features are unavailable
+
+### Cross-Platform Considerations
+- Test on macOS, Linux, and Windows
+- Use `platform.system()` for OS detection
+- Provide fallbacks for missing system tools
+- Handle path differences properly
+
+### Security
+- Validate all user inputs
+- Sanitize file paths and script names
+- Use subprocess.run() with explicit arguments
+- Never execute arbitrary code strings
+
+## Testing
+
+### Manual Testing
+1. Test setup.py interactive flows
+2. Verify Arduino communication on multiple ports
+3. Test script execution on different platforms
+4. Validate import/export functionality
+
+### Automated Testing
+1. Script interface validation
+2. Configuration file integrity
+3. Serial communication mocking
+4. Cross-platform compatibility
+
+## Performance Considerations
+
+- Script loading is cached after first load
+- Serial monitoring runs in separate thread
+- Configuration is saved only when changed
+- Remote repository responses are cached
+- Large exports are streamed to avoid memory issues
