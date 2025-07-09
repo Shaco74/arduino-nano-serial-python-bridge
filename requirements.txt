@@ -1,0 +1,5 @@
+rich>=13.0.0
+inquirer>=3.0.0
+pyserial>=3.5
+click>=8.0.0
+pyyaml>=6.0
